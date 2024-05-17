@@ -46,7 +46,7 @@ globals() {
 
 DEPS=( "ffmpeg" "curl" )
 module="v4l2loopback"
-module_cmd="modprobe v4l2loopback exclusive_caps=1 card_label='GoPro' video_nr=42"
+module_cmd="modprobe v4l2loopback exclusive_caps=1 card_label='GoPro' video_nr=4"
 module_cmd_unload="modprobe -rf v4l2loopback"
 
 START_PATH="/gp/gpWebcam/START?res="
@@ -381,7 +381,7 @@ function expose_device {
         if [ -n "${GOPRO_CROP}" ]; then
             CROP=",crop=${GOPRO_CROP}"
         fi
-        ffmpeg -nostdin -threads 1 -i 'udp://@0.0.0.0:8554?overrun_nonfatal=1&fifo_size=50000000' -f:v mpegts -fflags nobuffer -vf format="yuv420p${CROP}" -f v4l2 /dev/video42
+        ffmpeg -threads 1 -i "udp://@${GOPRO_IP}:8554?overrun_nonfatal=1&fifo_size=50000000" -b:v 80M -f:v mpegts -r 15 -fflags nobuffer -g 60 -vf "scale=640:480,format=yuyv422" -f v4l2 /dev/video4
     elif [[ ${GOPRO_PREVIEW} -eq 1 ]]; then
         echo "Starting preview.."
         start_preview
@@ -402,7 +402,7 @@ function info_only {
     echo -e "\n\nYou should be ready to use your GoPro on your prefered videostreaming tool. Have Fun!"
 
     echo -e "\n\nIf you want to use the GoPro in your prefered Video conferencing software (browser and apps works alike) pipe the UDP stream to a video device (that was created already) with this command: \n"
-    green "ffmpeg -nostdin -threads 1 -i 'udp://@0.0.0.0:8554?overrun_nonfatal=1&fifo_size=50000000' -f:v mpegts -fflags nobuffer -vf format=yuv420p -f v4l2 /dev/video42"
+    green "ffmpeg -nostdin -threads 1 -i 'udp://@0.0.0.0:8554?overrun_nonfatal=1&fifo_size=50000000' -f:v mpegts -fflags nobuffer -vf format=yuv420p -f v4l2 /dev/video4"
     
     echo -e "\nTo get a preview of the output in vlc you can run this command"
     echo -e "To test this try this command(vlc needs to be installed): \n"
